@@ -9,12 +9,23 @@
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+ */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('index');
 });
+
+Route::get('/posts/{id}', 'PostController@index');
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::post('/comment', 'UserController@store');
+
+Route::prefix('dashboard')->group(function () {
+    Route::get('/', 'UserController@index')->name('dashboard');
+    Route::resource('/posts', 'Admin\PostController', ['as' => 'admin']);
+});
+
+Route::get('/test', 'UserController@test');
