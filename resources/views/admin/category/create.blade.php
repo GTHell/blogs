@@ -1,19 +1,18 @@
 @extends('admin.layout.main')
 @section('content')
     <h4>Create User</h4>
-    <form action="{{route('admin.posts.update', ['id' => $post->id])}}" method="POST">
+    <form action="{{route('admin.posts.store')}}" method="POST">
         @csrf
-        @method('put')
         <div class="form-group">
             <label for="title">Post title</label>
-            <input type="text" name="title" id="title" class="form-control" value="{{$post->title}}" required>
+            <input type="text" name="title" id="title" class="form-control" required>
         </div>
-        <textarea id="summernote" name="body" required> {!! $post->body !!}</textarea>
+        <textarea id="summernote" name="body" required></textarea>
         <div class="form-group">
             <label for="category_id">category</label>
             <select name="category_id" id="category_id" class="form-control">
                 @foreach($cats as $cat)
-                    <option value="{{$cat->id}}" {{$cat->id == $post->category_id ? 'selected' : ''}}>{{$cat->name}}</option>
+                    <option value="{{$cat->id}}">{{$cat->name}}</option>
                 @endforeach
             </select>
         </div>

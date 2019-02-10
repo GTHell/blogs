@@ -53,7 +53,10 @@
           </li>
           <li class="nav-item">
             @if(auth::check())
-              <a class="nav-link" href="contact.html">Logout</a>
+                  <form action='{{route("logout")}}' method='POST' class="form-inline my-2 my-lg-0">
+                      @csrf
+                      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</button>
+                  </form>
             @else
               <a class="nav-link" href="{{route('login')}}">Login</a>
             @endif

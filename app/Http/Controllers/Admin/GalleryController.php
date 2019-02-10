@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Category;
-use App\Http\Controllers\Controller;
-use App\Post;
+use App\Image;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 
-class PostController extends Controller
+class GalleryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,9 +21,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('category', 'user')->get();
-        return view('admin.post.index')
-            ->with('posts', $posts);
+        $uid = auth()->user()->id;
+        $images = Image::where('user_id', $uid)->get();
+        return view('admin.image.index')->with('images', $images);
     }
 
     /**
@@ -29,8 +33,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        $cats = Category::all();
-        return view('admin.post.create')->with('cats', $cats);
+        return view('admin.image.create');
     }
 
     /**
@@ -44,14 +47,19 @@ class PostController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $name = time() . $image->getClientOriginalName();
-            $asset_path = 'post/'.Auth::user()->name. Auth::user()->id;
-            $path = public_path($asset_path);
-            $image->move($path, $name);
-            $request->merge(['lead_img' => $asset_path . '/' .$name]);
+            $url_path = 'img/u/'.  auth()->user()->name . auth()->user()->id;
+            $real_path = public_path($url_path);
+            $image->move(public_path($url_path), $name);
+
+            Image::create([
+                'user_id' => auth()->user()->id,
+                'url_path' => $url_path,
+                'real_path' => $real_path,
+                'name' => $name
+            ]);
         }
-        $request->merge(['user_id' => Auth::user()->id]);
-        Post::create($request->all());
-        return redirect(route('admin.posts.index'))->with('message', 'Created post success');
+
+        return redirect()->back()->with('message', 'Upload successfully');
     }
 
     /**
@@ -62,7 +70,7 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        return redirect(route('admin.posts.edit'));
+        //
     }
 
     /**
@@ -73,11 +81,7 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        $cats = Category::all();
-        $post = Post::find($id);
-        return view('admin.post.edit')
-            ->with('cats', $cats)
-            ->with('post', $post);
+        //
     }
 
     /**
@@ -89,8 +93,7 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Post::find($id)->update($request->all());
-        return redirect(route('admin.posts.index'))->with('message', 'updated successfully');
+        //
     }
 
     /**
@@ -101,7 +104,11 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        Post::destroy($id);
-        return redirect()->back()->with('message', 'Delete post with ' . $id . ' successfully');
+        $image = Image::find($id);
+        if (File::exists($image->path)) {
+            File::delete($image->path);
+        }
+        $image->delete();
+        return redirect(route('admin.images.index'))->with('message', 'Deleted Successfully');
     }
 }

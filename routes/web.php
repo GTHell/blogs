@@ -11,21 +11,25 @@
 |
  */
 
-Route::get('/', function () {
-    return view('index');
-});
-
-Route::get('/posts/{id}', 'PostController@index');
+Route::get('/', 'HomeController@index')->name('home');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/posts/{id}', 'PostController@show')->name('post');
 
-Route::post('/comment', 'UserController@store');
+Route::post('/posts/{id}/comment', 'CommentController@store')->name("comment.store");
+Route::delete('/posts/{id}/comment', 'CommentController@destroy')->name("comment.destroy");
+
+
+//Route::get('/home', 'HomeController@index')->name('home');
+
 
 Route::prefix('dashboard')->group(function () {
     Route::get('/', 'UserController@index')->name('dashboard');
     Route::resource('/posts', 'Admin\PostController', ['as' => 'admin']);
+    Route::resource('/images', 'Admin\GalleryController', ['as' => 'admin']);
+    // Admin
+    Route::resource('/categories', 'Admin\CategoryController', ['as' => 'admin']);
 });
 
 Route::get('/test', 'UserController@test');

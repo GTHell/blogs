@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -27,13 +28,35 @@ class LoginController extends Controller
      */
     protected $redirectTo = '/dashboard';
 
-    public function authenticate()
+    protected function authenticated(Request $request, $user)
     {
-        if (Auth::attempt(['email' => $email, 'password' => $password])) {
-            // Authentication passed...
-            return redirect()->intended('dashboard');
-        }
+        if ($request->has('comment'))
+            return redirect($request->url);
     }
+
+    protected function sendLoginResponse(Request $request)
+    {
+        if($request->session()->has('comment')) {
+            $request->merge([
+                'comment' => $request->session()->get('comment'),
+                'url' => $request->session()->get('url')
+            ]);
+        }
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        return $this->authenticated($request, $this->guard()->user())
+            ?: redirect()->intended($this->redirectPath());
+    }
+
+//    public function authenticated()
+//    {
+//        if (Auth::attempt(['email' => $email, 'password' => $password])) {
+//            // Authentication passed...
+//            return redirect()->intended('dashboard');
+//        }
+//    }
 
     /**
      * Create a new controller instance.

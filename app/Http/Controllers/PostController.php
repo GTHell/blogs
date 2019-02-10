@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index () {
-        return view('post.index');
-    }
-
-    public function test () {
-        return '123';
+    public function show ($id) {
+        $post = Post::find($id);
+        return view('post.index')->with('post', $post);
     }
 }
